@@ -3,7 +3,6 @@
 # This script obtains the magnitudes of the distance and velocity for a certain
 # particle as well as its mass. It also attached units to these quantities.
 
-
 # Import modules and functions
 import numpy as np
 import astropy.units as u
@@ -32,6 +31,6 @@ def ParticleInfo(filename, ptype, num):
     # Assign units and round to three decimal paces
     speed = np.around(speed * u.km / u.s, 3)
     # Extract the mass of and assign units to the particle
-    mass = type_sorted['m'][num-1] * u.solMass
+    mass = type_sorted['m'][num-1] * 10**10 * u.solMass
     # Return finished distance, speed, and mass
     return distance, speed, mass
