@@ -1,0 +1,3 @@
+The iterative process is important because the centers of mass are shifting very rapidly and are also dependent
+on each other. It is important to be able to track and recalculate when certain COMs are close to one another
+and where they are in relation to one another.
