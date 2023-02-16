@@ -167,7 +167,7 @@ class MassProfile:
         # Loop through indeces for the length of radii
         for i in range(len(radii)):
             # Calculate circular velocity elements
-            v_c[i] = np.sqrt(G * mass_arr[i] / radii[i])
+            v_c[i] = np.sqrt(G * mass_arr[i] / (radii[i]*u.kpc))
         return v_c
     
     def CircularVelocityTotal(self, radii):
@@ -193,7 +193,7 @@ class MassProfile:
         # Loop over indeces for the length of radii
         for i in range(len(radii)):
             # Calculate circular velocity elements
-            v_c[i] = np.sqrt(G * mass_arr[i]/radii[i])
+            v_c[i] = np.sqrt(G * mass_arr[i]/(radii[i]*u.kpc))
         return v_c
     
     def HernquistVCirc(self, r, a, Mhalo):
@@ -230,7 +230,7 @@ MW_halo = MW.MassEnclosed(1,r)
 MW_disk = MW.MassEnclosed(2,r)
 MW_bulge = MW.MassEnclosed(3,r)
 MW_total = MW.MassEnclosedTotal(r)
-MW_hernquist = MW.HernquistMass(r,3,1.975E12)
+MW_hernquist = MW.HernquistMass(r,2,1.975E12)
 # Plot the mass profiles for components and totals
 fig, ax = plt.subplots()
 # Use log scale for y axis
@@ -251,7 +251,7 @@ M31_halo = M31.MassEnclosed(1,r)
 M31_disk = M31.MassEnclosed(2,r)
 M31_bulge = M31.MassEnclosed(3,r)
 M31_total = M31.MassEnclosedTotal(r)
-M31_hernquist = M31.HernquistMass(r,3,1.975E12)
+M31_hernquist = M31.HernquistMass(r,2.5,1.975E12)
 # Plot the mass profiles for components and totals
 fig, ax = plt.subplots()
 # Use log scale for y axis
@@ -271,7 +271,7 @@ M33 = MassProfile('M33', 0)
 M33_halo = M33.MassEnclosed(1,r)
 M33_disk = M33.MassEnclosed(2,r)
 M33_total = M33.MassEnclosedTotal(r)
-M33_hernquist = M33.HernquistMass(r,3,1.975E12)
+M33_hernquist = M33.HernquistMass(r,1,1.975E12)
 # Plot the mass profiles for components and totals
 fig, ax = plt.subplots()
 # Use log scale for the y axis
@@ -338,7 +338,7 @@ fig, ax = plt.subplots()
 # Use log scale for the y axis
 plt.semilogy()
 # Create labels
-ax.set(title='M33 Rotation Curve', xlabel='Radius [kpc]', ylabel='Encompassed Mass [Msun]')
+ax.set(title='M33 Rotation Curve', xlabel='Radius [kpc]', ylabel='Circular Velocity [km/s]')
 ax.plot(r, M33_halo, label='Halo')
 ax.plot(r, M33_disk, 'r', label='Disk')
 ax.plot(r, M33_total, 'black', label='Total')
