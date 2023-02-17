@@ -15,7 +15,8 @@ class MassProfile:
 # Class to define mass profiles, rotation curves, and Hernquist profiles
     def __init__(self, galaxy, snap):
         '''
-        This function initializes the class
+        This function initializes the class in order to obtain mass profiles
+        and rotation curves of the galaxies
 
         Parameters
         ----------
@@ -160,14 +161,10 @@ class MassProfile:
                 The circular velocities of the galaxy at a specified distance
         
         '''
-        # Create a 0 array with the length of the radii to store velocities in
-        v_c = np.zeros(len(radii))
         # Calculate the mass profile of this specific component
         mass_arr = self.MassEnclosed(ptype, radii)
-        # Loop through indeces for the length of radii
-        for i in range(len(radii)):
-            # Calculate circular velocity elements
-            v_c[i] = np.sqrt(G * mass_arr[i] / (radii[i]*u.kpc))
+        # Calculate circular velocity of this component at each radius
+        v_c = np.sqrt(G * mass_arr / (radii*u.kpc))
         return v_c
     
     def CircularVelocityTotal(self, radii):
@@ -186,25 +183,22 @@ class MassProfile:
             The array of circular velocities at each radius
 
         '''
-        # Create an array of 0s with the length of the radii to store velocities in
-        v_c = np.zeros(len(radii))
         # Calculate a total mass array for each radius
         mass_arr = self.MassEnclosedTotal(radii)
-        # Loop over indeces for the length of radii
-        for i in range(len(radii)):
-            # Calculate circular velocity elements
-            v_c[i] = np.sqrt(G * mass_arr[i]/(radii[i]*u.kpc))
-        return v_c
+        # Calculate the circular velocities of all components at each radius
+        v_c_total = np.sqrt(G*mass_arr/(r*u.kpc))
+        return v_c_total
+
     
-    def HernquistVCirc(self, r, a, Mhalo):
+    def HernquistVCirc(self, radii, a, Mhalo):
         '''
         This function calculates the circular velocity at different radii
         based on their enclosed Hernquist mass
         
         Parameters
         ----------
-            r: float
-                The radius to calculate M at
+            radii: array
+                The radii to calculate M at
             a: float
                 The scale radius of the galaxy
             Mhalo: float
@@ -216,8 +210,10 @@ class MassProfile:
                 An array of circular velocities at each radius
                 
         '''
-        # Calculate the Hernquist circular velocities
-        v_c_hernquist = np.sqrt(G * self.HernquistMass(r, a, Mhalo) / r)
+        # Calculate the Hernquist mass array at different radii
+        mass_arr = self.HernquistMass(radii, a, Mhalo)
+        # Calculate the Hernquist circular velocity
+        v_c_hernquist = np.sqrt(G * mass_arr / (radii*u.kpc))
         # Round to 2 decimal places and return
         return np.round(v_c_hernquist, 2)
  
@@ -230,7 +226,7 @@ MW_halo = MW.MassEnclosed(1,r)
 MW_disk = MW.MassEnclosed(2,r)
 MW_bulge = MW.MassEnclosed(3,r)
 MW_total = MW.MassEnclosedTotal(r)
-MW_hernquist = MW.HernquistMass(r,2,1.975E12)
+MW_hernquist = MW.HernquistMass(r,28.3,1.975E12)
 # Plot the mass profiles for components and totals
 fig, ax = plt.subplots()
 # Use log scale for y axis
@@ -238,10 +234,10 @@ plt.semilogy()
 # Create labels
 ax.set(title='Milky Way Mass Profile', xlabel='Radius [kpc]', ylabel='Encompassed Mass [Msun]')
 ax.plot(r, MW_halo, label='Halo')
-ax.plot(r, MW_disk, 'r', label='Disk')
+ax.plot(r, MW_disk, 'purple', label='Disk')
 ax.plot(r, MW_bulge, 'g', label='Bulge')
 ax.plot(r, MW_total, 'black', label='Total')
-ax.plot(r, MW_hernquist, 'purple', label='Hernquist Profile' )
+ax.plot(r, MW_hernquist, 'r:', label='Hernquist (a=28.3)' )
 ax.legend()
 
 # Initialize class for this galaxy name and snap
@@ -251,7 +247,7 @@ M31_halo = M31.MassEnclosed(1,r)
 M31_disk = M31.MassEnclosed(2,r)
 M31_bulge = M31.MassEnclosed(3,r)
 M31_total = M31.MassEnclosedTotal(r)
-M31_hernquist = M31.HernquistMass(r,2.5,1.975E12)
+M31_hernquist = M31.HernquistMass(r,28.8,1.9721E12)
 # Plot the mass profiles for components and totals
 fig, ax = plt.subplots()
 # Use log scale for y axis
@@ -259,10 +255,10 @@ plt.semilogy()
 # Create labels
 ax.set(title='M31 Mass Profile', xlabel='Radius [kpc]', ylabel='Encompassed Mass [Msun]')
 ax.plot(r, M31_halo, label='Halo')
-ax.plot(r, M31_disk, 'r', label='Disk')
+ax.plot(r, M31_disk, 'purple', label='Disk')
 ax.plot(r, M31_bulge, 'g', label='Bulge')
 ax.plot(r, M31_total, 'black', label='Total')
-ax.plot(r, M31_hernquist, 'purple', label='Hernquist Profile' )
+ax.plot(r, M31_hernquist, 'r:', label='Hernquist (a=28.8)' )
 ax.legend()
 
 # Initialize class for this galaxy name and snap
@@ -271,7 +267,7 @@ M33 = MassProfile('M33', 0)
 M33_halo = M33.MassEnclosed(1,r)
 M33_disk = M33.MassEnclosed(2,r)
 M33_total = M33.MassEnclosedTotal(r)
-M33_hernquist = M33.HernquistMass(r,1,1.975E12)
+M33_hernquist = M33.HernquistMass(r,15.8,1.87E11)
 # Plot the mass profiles for components and totals
 fig, ax = plt.subplots()
 # Use log scale for the y axis
@@ -279,9 +275,9 @@ plt.semilogy()
 # Create labels
 ax.set(title='M33 Mass Profile', xlabel='Radius [kpc]', ylabel='Encompassed Mass [Msun]')
 ax.plot(r, M33_halo, label='Halo')
-ax.plot(r, M33_disk, 'r', label='Disk')
+ax.plot(r, M33_disk, 'purple', label='Disk')
 ax.plot(r, M33_total, 'black', label='Total')
-ax.plot(r, M33_hernquist, 'purple', label='Hernquist Profile' )
+ax.plot(r, M33_hernquist, 'r:', label='Hernquist (a=15.8)' )
 ax.legend()
 
 
@@ -291,7 +287,7 @@ MW_halo = MW.CircularVelocity(1,r)
 MW_disk = MW.CircularVelocity(2,r)
 MW_bulge = MW.CircularVelocity(3,r)
 MW_total = MW.CircularVelocityTotal(r)
-MW_hernquist = MW.HernquistVCirc(r,35,1.975E12)
+MW_hernquist = MW.HernquistVCirc(r,28.3,1.975E12)
 # Plot the rotation curves for components and totals
 fig, ax = plt.subplots()
 # Use log scale for y axis
@@ -299,10 +295,10 @@ plt.semilogy()
 # Create labels
 ax.set(title='Milky Way Rotation Curve', xlabel='Radius [kpc]', ylabel='Circular velocity [km/s]')
 ax.plot(r, MW_halo, label='Halo')
-ax.plot(r, MW_disk, 'r', label='Disk')
+ax.plot(r, MW_disk, 'purple', label='Disk')
 ax.plot(r, MW_bulge, 'g', label='Bulge')
 ax.plot(r, MW_total, 'black', label='Total')
-#ax.plot(r, MW_hernquist, 'purple', label='Hernquist Rotation Curve' )
+ax.plot(r, MW_hernquist, 'r:', label='Hernquist (a=28.3)' )
 ax.legend()
 
 # Initialize class for this galaxy name and snap
@@ -312,7 +308,7 @@ M31_halo = M31.CircularVelocity(1,r)
 M31_disk = M31.CircularVelocity(2,r)
 M31_bulge = M31.CircularVelocity(3,r)
 M31_total = M31.CircularVelocityTotal(r)
-M31_hernquist = M31.HernquistVCirc(r,3,1.975E12)
+M31_hernquist = M31.HernquistVCirc(r,28.8,1.921E12)
 # Plot the rotation curves for components and totals
 fig, ax = plt.subplots()
 # Use log scale for y axis
@@ -320,10 +316,10 @@ plt.semilogy()
 # Create labels
 ax.set(title='M31 Rotation Curve', xlabel='Radius [kpc]', ylabel='Circular Velocity [km/s]')
 ax.plot(r, M31_halo, label='Halo')
-ax.plot(r, M31_disk, 'r', label='Disk')
+ax.plot(r, M31_disk, 'purple', label='Disk')
 ax.plot(r, M31_bulge, 'g', label='Bulge')
 ax.plot(r, M31_total, 'black', label='Total')
-#ax.plot(r, M31_hernquist, 'purple', label='Hernquist Profile' )
+ax.plot(r, M31_hernquist, 'r:', label='Hernquist (a=28.8)' )
 ax.legend()
 
 # Initialize class for this galaxy name and snap
@@ -332,7 +328,7 @@ M33 = MassProfile('M33', 0)
 M33_halo = M33.MassEnclosed(1,r)
 M33_disk = M33.MassEnclosed(2,r)
 M33_total = M33.MassEnclosedTotal(r)
-M33_hernquist = M33.HernquistVCirc(r,35,1.975E12)
+M33_hernquist = M33.HernquistVCirc(r,15.8,1.87E11)
 # Plot the rotation curves for components and totals
 fig, ax = plt.subplots()
 # Use log scale for the y axis
@@ -340,7 +336,7 @@ plt.semilogy()
 # Create labels
 ax.set(title='M33 Rotation Curve', xlabel='Radius [kpc]', ylabel='Circular Velocity [km/s]')
 ax.plot(r, M33_halo, label='Halo')
-ax.plot(r, M33_disk, 'r', label='Disk')
+ax.plot(r, M33_disk, 'purple', label='Disk')
 ax.plot(r, M33_total, 'black', label='Total')
-ax.plot(r, M33_hernquist, 'purple', label='Hernquist Profile' )
+ax.plot(r, M33_hernquist, 'r:', label='Hernquist (a=15.8)')
 ax.legend()
