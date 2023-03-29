@@ -4,6 +4,11 @@
 ''' This is a draft using a class for snapshot data. Doing this will allow
 me to easily access all particle data at different snapshots.'''
 
+''' My research topic is the kinematic evolution of sunlike disk stars in M31'''
+
+''' Question: How do the kinematics of Sun analogs change? '''
+
+
 # Import modules
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,6 +20,18 @@ from CenterOfMass_Soln import CenterOfMass
 
 class Snap:
     def __init__(self, filename, ptype=2):
+        '''
+        This function initializes an object of class Snap
+
+        Parameters
+        ----------
+        filename : `str`
+            Snapshot file to initialize as Snap object
+        ptype : `int`, optional
+            Integer representing which particle type to examine. 
+            The default is 2 for disk particles
+        '''
+        print('init '+filename)
         # Read in file data
         self.time, self.total, self.data = Read(filename)
         # Create an index to sort by specified ptype
@@ -46,18 +63,25 @@ class Snap:
             pos_vec = np.append(pos_vec, curr_pos_vec)
             vel_vec = np.append(vel_vec, curr_vel_vec)
         # Create methods for COM frame pos, vel vector array for all particles
-        self.pos_vec = pos_vec
-        self.vel_vec = vel_vec
+        self.pos_vec = pos_vec.reshape((len(self.x_raw),3))
+        self.vel_vec = vel_vec.reshape((len(self.vx_raw),3))
     
     def SunlikeIndices(self):
+        print('indices')
         '''
         This function defines an annulus of stars with sunlike orbital radii
         and velocities. It will be run for the initial snapnumber.
+        
+        OUTPUTS
+        -------
+        indices: `array of ints`
+            Indices of snap file that represent stellar candidates
         '''
         # Create an empty storage array
         indices = np.array([])
         # Loop over particles
-        for i in range(len(self.pos_vec)):
+        j = 0
+        for i in range(self.pos_vec.shape[0]):
             # Calculate magnitude of pos, vel vectors
             dist = np.linalg.norm(self.pos_vec[i])
             speed = np.linalg.norm(self.vel_vec[i])
@@ -69,7 +93,17 @@ class Snap:
     
     def RadialVelocity(self, indices):
         '''
-        This function computes the radial velocity array for indexed particles only
+        This function computes the radial velocity array for indexed particles only.
+        
+        INPUTS
+        ------
+        indices: `array of ints`
+            Indices of snap file that represent stellar candidates
+            
+        OUTPUTS
+        -------
+        v_rads: `array of floats`
+            Radial velocity components for each particle
         '''
         # Create empty storage array
         v_rads = np.array([])
@@ -84,7 +118,52 @@ class Snap:
             # Store radial velocity
             v_rads = np.append(v_rads, v_rad)
         # Return 1d array of each indexed star's v_rad.
-        return v_rad
+        return v_rads
+    
+    def SunlikeSpeeds(self, indices):
+        #print('started speeds')
+        '''
+        This function calculates the magnitude of the velocity vector for indexed
+        particles only
+        
+        INPUTS
+        ------
+        indices: `array of ints`
+            Indices of snap file that represent stellar candidates
+            
+        OUTPUTS
+        -------
+        speeds: `array of floats`
+            Magnitude of velocity for each stellar candidate
+        '''
+        speeds = np.array([])
+        for i in indices:
+            speed = np.linalg.norm(self.vel_vec[int(i)])
+            speeds = np.append(speeds, speed)
+        return speeds
+    
+    def SunlikeDistances(self, indices):
+        #print('started distances')
+        '''
+        This function calculates the magnitude of the position vector for indexed
+        particles only
+        
+        INPUTS
+        ------
+        indices: `array of ints`
+            Indices of snap file that represent stellar candidates
+            
+        OUTPUTS
+        -------
+        distances: `array of floats`
+            Magnitude of position for each stellar candidate
+        '''
+        distances = np.array([])
+        for i in indices:
+            #print(i)
+            distance = np.linalg.norm(self.pos_vec[int(i)])
+            distances = np.append(distances, distance)
+        return distances
         
     # Do not need GetProperties as function will be methods for Snap objects.
         
@@ -94,3 +173,12 @@ class Snap:
     'This does of course assume indices for each particle stay the same'
 # Loop over snapnumbers in multiples of 5. Find average position and velocity
 # vectors at these times and graph as a function of time.
+snap_i = Snap('M31_000.txt')
+stellar_candidates = snap_i.SunlikeIndices()
+snap_f = Snap('M31_800.txt')
+final_orbital_distances = snap_f.SunlikeDistances(stellar_candidates)
+fig, ax = plt.subplots()
+ax.set(title='Final Orbital distances of stellar candidate stars',
+       xlabel='Orbital Distance [kpc]', ylabel='Number of Stellar Candidates')
+ax.hist(final_orbital_distances, bins=100, range=(0,60))
+ax.plot(np.full(25, 8), np.linspace(0,25,25), 'r:', linewidth='1')
