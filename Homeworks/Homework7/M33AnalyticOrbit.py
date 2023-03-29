@@ -74,7 +74,7 @@ class M33AnalyticOrbit:
         # **** self.rdisk = scale length (no units)
         self.rdisk = 5 #kpc
         # **** self.Mdisk set with ComponentMass function. Remember to *1e12 to get the right units. Use the right ptype
-        self.Mdisk = ComponentMass('M31_000.txt', 1).value  * 1e12# Msun
+        self.Mdisk = ComponentMass('M31_000.txt', 2).value  * 1e12# Msun
         ### bulge
         # **** self.rbulge = set scale length (no units)
         self.rbulge = 1 #kpc
